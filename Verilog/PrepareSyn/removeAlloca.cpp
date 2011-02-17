@@ -8,7 +8,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -21,14 +21,14 @@
 
 namespace xVerilog {
 
-    Function* MyCloneFunction(const Function *F, DenseMap<const Value*, Value*> &ValueMap, const Type* addedArg, std::string name) {
+    Function* MyCloneFunction(const Function *F, ValueToValueMapTy &valueMap, const Type* addedArg, std::string name) {
         std::vector<const Type*> ArgTypes;
 
         // The user might be deleting arguments to the function by specifying them in
         // the ValueMap.  If so, we need to not add the arguments to the arg ty vector
         //
         for (Function::const_arg_iterator I = F->arg_begin(), E = F->arg_end(); I != E; ++I)
-            if (ValueMap.count(I) == 0)  // Haven't mapped the argument to anything yet?
+            if (valueMap.count(I) == 0)  // Haven't mapped the argument to anything yet?
                 ArgTypes.push_back(I->getType());
 
         ArgTypes.push_back(addedArg);
@@ -42,16 +42,16 @@ namespace xVerilog {
         // Loop over the arguments, copying the names of the mapped arguments over...
         Function::arg_iterator DestI = NewF->arg_begin();
         for (Function::const_arg_iterator I = F->arg_begin(), E = F->arg_end(); I != E; ++I)
-            if (ValueMap.count(I) == 0) {   // Is this argument preserved?
+            if (valueMap.count(I) == 0) {   // Is this argument preserved?
                 DestI->setName(I->getName()); // Copy the name over...
-                ValueMap[I] = DestI++;        // Add mapping to ValueMap
+                valueMap[I] = DestI++;        // Add mapping to ValueMap
             }
 
         (--NewF->arg_end())->setName(name);
 
 
-        std::vector<ReturnInst*> Returns;  // Ignore returns cloned...
-        CloneFunctionInto(NewF, F, ValueMap, Returns, "", 0);
+        SmallVector<ReturnInst*, 5> Returns;  // Ignore returns cloned...
+        CloneFunctionInto(NewF, F, valueMap, false, Returns, "", 0);
         return NewF;
     }
 
@@ -62,12 +62,12 @@ namespace xVerilog {
                 for (BasicBlock::iterator it = bbit->begin(); it != bbit->end(); ++it) {
                     if (AllocaInst *alloca = dyn_cast<AllocaInst>(it)) {
 
-                        DenseMap<const Value*, Value*> my_map;
+                        ValueToValueMapTy my_map;
                         const Type* tp = (alloca)->getType(); 
                         std::string name = (alloca)->getName();
                         Function* NewFunc = MyCloneFunction(Fit, my_map, tp, name);
 
-                        Instruction* newalloca = dynamic_cast<Instruction*>(my_map[alloca]); // The alloca in the new function
+                        Instruction* newalloca = dyn_cast<Instruction>(my_map[alloca]); // The alloca in the new function
                         Argument* arg = --NewFunc->arg_end();
 
                         newalloca->replaceAllUsesWith(arg);

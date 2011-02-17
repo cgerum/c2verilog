@@ -4,7 +4,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <iostream>
 
 #include "../utils.h"
 #include "subscriptDetect.h" 
@@ -31,7 +32,7 @@ namespace xVerilog {
         assert(ptr && "ptr is not of GetElementPtrInst type");
         // Pointer to the value that the GetElementPtrInst uses as index of the array
         Value* index = ptr->getOperand(1);
-        cerr<<"DBG: working on index"<<*index;  
+        std::cerr<<"DBG: working on index"/*<<*index*/;  
        
         // In this case, change the 'ADD' instruction to reflect the offset
         if (BinaryOperator* bin = dyn_cast<BinaryOperator>(index)) {
@@ -47,7 +48,7 @@ namespace xVerilog {
                     if (ConstantInt *con = dyn_cast<ConstantInt>(bin->getOperand(param_num))) {
                         unsigned int current_off = con->getValue().getZExtValue();
                         // create a new constant
-                        ConstantInt *ncon = ConstantInt::get(APInt(bitWidth, offset + current_off));
+                        ConstantInt *ncon = ConstantInt::get(inst->getContext(), APInt(bitWidth, offset + current_off));
                         bin->setOperand(param_num,ncon);
                     }
                 }
@@ -72,7 +73,7 @@ namespace xVerilog {
         unsigned int bitWidth = cast<IntegerType>(index->getType())->getBitWidth();
         // New add instruction, place it before the GetElementPtrInst 
         BinaryOperator* newIndex = BinaryOperator::Create(Instruction::Add, 
-                ConstantInt::get(APInt(bitWidth, offset)) , index, "i_offset", ptr);
+                                                          ConstantInt::get(inst->getContext(), APInt(bitWidth, offset)) , index, "i_offset", ptr);
         // Tell GetElementPtrInst to use it instead of the normal PHI
         ptr->setOperand(1,newIndex); 
     }
@@ -135,10 +136,10 @@ namespace xVerilog {
         for (inst_iterator i = inst_begin(F), e = inst_end(F); i != e; ++i) {
             Instruction *inst = &*i;
             if (isStoreSubscript(inst)) {
-                cerr<<"Found Store "<<*inst;
+              std::cerr<<"Found Store ";//<<*inst;
                 m_StoreSubscripts.insert(inst);
             } else if (isLoadSubscript(inst)) {
-                cerr<<"Found Load "<<*inst;
+              std::cerr<<"Found Load ";//<<*inst;
                 m_LoadSubscripts.insert(inst);
             }
         }

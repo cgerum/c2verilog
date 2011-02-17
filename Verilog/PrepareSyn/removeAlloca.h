@@ -7,7 +7,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -41,7 +41,7 @@ namespace xVerilog {
             /** 
              * @brief C'tor in LLVM style
              */
-            RemoveAllocaPass() : ModulePass((intptr_t)&ID) {}
+            RemoveAllocaPass() : ModulePass(ID) {}
 
             /** 
              * @param AU llvm analysis usage internal object

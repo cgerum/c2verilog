@@ -4,7 +4,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -26,7 +26,7 @@ namespace xVerilog {
         Value* ld = isLoadSubscript(inst);
         Value* st = isStoreSubscript(inst);
         exp = (ld? ld : (st? st: NULL ));
-        if (NULL == exp) cerr<<"offset:"<<offset<<"  inst:"<<*inst;
+        if (NULL == exp) std::cerr<<"offset:"<<offset<<"  inst:";//<<*inst;
         assert(exp && "Inst is nither Load or Store array subscript");
         GetElementPtrInst *ptr = dyn_cast<GetElementPtrInst>(exp);
         assert(ptr && "ptr is not of GetElementPtrInst type");
@@ -47,7 +47,7 @@ namespace xVerilog {
                     if (ConstantInt *con = dyn_cast<ConstantInt>(bin->getOperand(param_num))) {
                         unsigned int current_off = con->getValue().getZExtValue();
                         // create a new constant
-                        ConstantInt *ncon = ConstantInt::get(APInt(bitWidth, offset + current_off));
+                        ConstantInt *ncon = ConstantInt::get(inst->getContext(),  APInt(bitWidth, offset + current_off));
                         bin->setOperand(param_num,ncon);
                     }
                 }
@@ -84,7 +84,7 @@ namespace xVerilog {
         unsigned int bitWidth = cast<IntegerType>(index->getType())->getBitWidth();
         // New add instruction, place it before the GetElementPtrInst 
         BinaryOperator* newIndex = BinaryOperator::Create(Instruction::Add, 
-                ConstantInt::get(APInt(bitWidth, offset)) , index, "i_offset", ptr);
+                                                          ConstantInt::get(inst->getContext(), APInt(bitWidth, offset)) , index, "i_offset", ptr);
         // Tell GetElementPtrInst to use it instead of the normal PHI
         ptr->setOperand(1,newIndex); 
     }
@@ -192,7 +192,7 @@ namespace xVerilog {
             return dyn_cast<Instruction>(val);
         }
         unsigned int bitWidth = cast<IntegerType>(val->getType())->getBitWidth();
-        ConstantInt *ncon = ConstantInt::get(APInt(bitWidth, offset));
+        ConstantInt *ncon = ConstantInt::get(val->getContext(),  APInt(bitWidth, offset));
         if (insert) {
             return BinaryOperator::Create(Instruction::Add, ncon, val, "incrementVal",insert);
         } else {

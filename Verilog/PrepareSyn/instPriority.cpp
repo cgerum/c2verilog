@@ -6,11 +6,11 @@ namespace xVerilog {
     string instructionPriority::toString() {
         stringstream ss;
 
-        ss<<"InstructionPriority for \""<<BB->getName()<<"\"["<<getMaxDepth()<<"]\n";
+        ss<<"InstructionPriority for \""<<BB->getName().str()<<"\"["<<getMaxDepth()<<"]\n";
         for (unsigned int i=0; i<getMaxDepth(); i++) {
             ss<<i<<":"<<std::endl;
             for (BasicBlock::const_iterator it = BB->begin(); it != BB->end(); ++it) {
-                if (i == m_depth[it]) ss<<"\t"<<*it<<std::endl;
+              if (i == m_depth[it]) ss<<"\t"<</**it<<*/std::endl; //TODO
             }
 
         }    
@@ -26,7 +26,7 @@ namespace xVerilog {
 
     void instructionPriority::replaceFirstUseOfWith(Instruction* inst, Instruction* cloned) {
         for (Instruction::use_iterator it = inst->use_begin(); it!= inst->use_end(); ++it) {
-            if (Instruction* dep = dyn_cast<Instruction>(it)) {
+            if (Instruction* dep = dyn_cast<Instruction>(*it)) {
                 if (dep->getParent() == cloned->getParent()) {
                     // replace the use with 'cloned' instruction
                     for (Instruction::op_iterator ops = it->op_begin(); ops!= it->op_end(); ++ops) {
@@ -44,7 +44,7 @@ namespace xVerilog {
     unsigned int instructionPriority::getLocalUses(const Instruction* inst, const BasicBlock* BB) {
         unsigned int uses = 0;
         // For all of the users of this instructions
-        for (Instruction::use_const_iterator it = inst->use_begin(); it!= inst->use_end(); ++it) {
+        for (Instruction::const_use_iterator it = inst->use_begin(); it!= inst->use_end(); ++it) {
             // Which are really instructions
             if (const Instruction* d = dyn_cast<Instruction>(*it)) {
                 // And are in this basic block

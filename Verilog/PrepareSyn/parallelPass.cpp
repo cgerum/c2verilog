@@ -6,7 +6,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -178,7 +178,7 @@ namespace xVerilog {
         // for all users
         for (Instruction::use_iterator us = inst->use_begin(); us!= inst->use_end(); ++us) {
             // If this user is a binary operator
-            if (BinaryOperator* bin = dyn_cast<BinaryOperator>(us)) {
+            if (BinaryOperator* bin = dyn_cast<BinaryOperator>(*us)) {
                 // of the same type
                 if (bin->getOpcode() == binType) {
                     return false;

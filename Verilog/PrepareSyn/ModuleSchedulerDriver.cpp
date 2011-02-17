@@ -85,19 +85,19 @@ namespace xVerilog {
         assert(header->getTerminator() && "Header has no terminator");
 
         // Maps the old instructions to the new Instructions
-        DenseMap<const Value *, Value *>  ValueMap;
+        ValueToValueMapTy   valueMap;
         // Do the actual clone
         stringstream iname;
         iname<<"___"<<offset<<"___";
-        BasicBlock* newBB = CloneBasicBlock(body, ValueMap, iname.str().c_str());
+        BasicBlock* newBB = CloneBasicBlock(body, valueMap, iname.str().c_str());
 
         // Fixing the dependencies for each of the instructions in the cloned BB
         // They now depend on themselves rather on the old cloned BB.
         for (BasicBlock::iterator it = newBB->begin(); it != newBB->end(); ++it) {
             for (Instruction::op_iterator ops = (it)->op_begin(); ops != (it)->op_end(); ++ops) {
-                if (ValueMap.end() != ValueMap.find(*ops)) {
-                    //*ops = ValueMap[*ops];
-                    it->replaceUsesOfWith(*ops, ValueMap[*ops]);
+                if (valueMap.end() != valueMap.find(*ops)) {
+                    //*ops = valueMap[*ops];
+                    it->replaceUsesOfWith(*ops, valueMap[*ops]);
                 }
             }
         }
@@ -112,7 +112,7 @@ namespace xVerilog {
 
                 // If we are handling a PHI node which is the induction index ? A[PHI(i,0)] ?
                 // If so, turn it into A[i + offset]
-                if (ValueMap[induction] == phi) {
+                if (valueMap[induction] == phi) {
                     Instruction *add = subscripts::incrementValue(prevalue, offset);
                     //add->insertBefore(phi); This is the same as next line (compiles on LLVM2.1)
                     phi->getParent()->getInstList().insert(phi, add);
@@ -136,7 +136,7 @@ namespace xVerilog {
             }
         }
         newBB->dropAllReferences();
-        return ValueMap[inst];
+        return valueMap[inst];
     }
 
     bool ModuloSchedulerDriverPass::runOnLoop(Loop *IncomingLoop, LPPassManager &LPM_Ref) {
