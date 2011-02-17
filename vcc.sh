@@ -1,5 +1,5 @@
 TMPFILE="/tmp/file.bc"
-LLVM="/opt/llvm/"
+LLVM="./llvm/Debug+Asserts/"
 
  echo "This is the VCC command line tool. Usage vcc.sh source.c dst.v"
 
@@ -17,7 +17,7 @@ MYFLAGS="-parallel_balance -reduce_bitwidth " #-detect_arrays"
 rm -f $TMPFILE
 rm -f /tmp/dis.txt /tmp/dis1.txt /tmp/dis2.txt /tmp/dis3.txt /tmp/dis4.txt
 
-$LLVM/bin/g++ -emit-llvm -c $1 -o $TMPFILE
+$LLVM/bin/clang -emit-llvm -c $1 -o $TMPFILE
 $LLVM/bin/llvm-dis $TMPFILE -o /tmp/dis1.txt
 $LLVM/bin/opt -load=$LLVM/lib/LLVMPrepareSynthesis.so $OPTFLAGS $MEM $TMPFILE -o $TMPFILE -f
 $LLVM/bin/llvm-dis $TMPFILE -o /tmp/dis2.txt
