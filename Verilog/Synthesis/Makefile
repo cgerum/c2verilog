@@ -7,7 +7,7 @@
 # 
 ##===----------------------------------------------------------------------===##
 
-LEVEL = ../../../..
+LEVEL = ../../..
 LIBRARYNAME = LLVMSynthesis
 TARGET=Verilog
 LOADABLE_MODULE = 1

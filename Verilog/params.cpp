@@ -5,9 +5,9 @@
 namespace xVerilog {
 
  // the parser method for our integer parser 
-    bool UnitNumParser::parse(cl::Option &O, const char *ArgName,
-            const std::string &Arg, unsigned &Val) {
-        const char *ArgStart = Arg.c_str();
+bool UnitNumParser::parse(cl::Option &O, llvm::StringRef &ArgName,
+                          llvm::StringRef &Arg, unsigned &Val) {
+  const char *ArgStart = Arg.str().c_str();
         char *End;
         // Parse integer part, leaving 'End' pointing to the first non-integer char
         Val = (unsigned)strtol(ArgStart, &End, 0);

@@ -3,7 +3,7 @@
 #ifndef LLVM_SCHED_UTILS_H
 #define LLVM_SCHED_UTILS_H
 
-#include "llvm/Support/Mangler.h"
+#include "llvm/Target/Mangler.h"
 
 #include <iostream>
 #include <string>
@@ -46,11 +46,11 @@ namespace {
 
     void logPassMessage(std::string passName,int line ,std::string message, bool good=true) {
         if (good) {
-            cerr<<xBlue();
+            std::cerr<<xBlue();
         } else {
-            cerr<<xRed();
+            std::cerr<<xRed();
         }
-        cerr<<"OPT:"<<passName<<","<<line<<":"<<xReset()<<message<<std::endl;
+        std::cerr<<"OPT:"<<passName<<","<<line<<":"<<xReset()<<message<<std::endl;
     }
 
 
@@ -79,7 +79,7 @@ namespace {
         if (CI && !isa<GlobalValue>(CI)) {
             stringstream ss;
             const Type* Ty = CI->getType();
-            if (Ty == Type::Int1Ty)
+            if (Ty == Type::getInt1Ty(Operand->getContext()))
                 ss<<((CI->getZExtValue() ? "1" : "0"));
             else {
                 ss << "(";
@@ -99,7 +99,7 @@ namespace {
             VarName = toPrintable(Name);
 
             const Type* tp = Operand->getType();
-            if (tp->isInteger()) {
+            if (tp->isIntegerTy()) {
                 Name = "i_" + VarName;
             } else if(tp->isSized()) {
                 Name = "p_" + VarName;
@@ -113,7 +113,7 @@ namespace {
  		 return "(0) /* NULL */";
 	}
 	//TODO: pass mang to this method ...
-        Name = mang->getValueName(Operand);
+        Name = Operand->getName().str();
         
 
         return Name;

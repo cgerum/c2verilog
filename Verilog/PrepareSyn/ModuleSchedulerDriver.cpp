@@ -4,7 +4,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/LoopInfo.h"
@@ -61,10 +61,10 @@ namespace xVerilog {
             for (BasicBlock::iterator it = (*bbit)->begin(); it!= (*bbit)->end(); ++it) {
                 if (dyn_cast<CallInst>(it)) return false;
                 if (dyn_cast<ReturnInst>(it)) return false;
-                if (dyn_cast<AllocationInst>(it)) return false;
+                if (dyn_cast<AllocaInst>(it)) return false;
                 if (dyn_cast<UnwindInst>(it)) return false;
                 if (dyn_cast<UnreachableInst>(it)) return false;
-                if (dyn_cast<FreeInst>(it)) return false;
+                //if (dyn_cast<FreeInst>(it)) return false;
                 if (dyn_cast<VAArgInst>(it)) return false;
                 if (dyn_cast<ExtractElementInst>(it)) return false;
                 if (dyn_cast<InsertElementInst>(it)) return false;
@@ -195,7 +195,7 @@ namespace xVerilog {
 
                         // Create the new PHI Node to replace the node
                         if (!dyn_cast<StoreInst>(ib) && !ib->isTerminator()) {
-                            std::string newname = "glue" + (*it)->getName();
+                          std::string newname = "glue" + (*it)->getName().str();
 
                             //PHINode* np = PHINode::Create(ib->getType(), "glue", *it);
                             PHINode* np = PHINode::Create(ib->getType(), newname, *it);
@@ -272,7 +272,7 @@ namespace xVerilog {
                // For each of the users of this address (I assume all users are in this BB)
                for (Instruction::use_iterator uit = inst->use_begin(); uit!= inst->use_end(); ++uit) {
                    // If this is STORE or LOAD (and we are asked for S or L)
-                   if (dyn_cast<StoreInst>(uit) && store || dyn_cast<LoadInst>(uit) && !store)  {
+                 if ((isa<StoreInst>(*uit) && store) || (isa<LoadInst>(*uit) && !store))  {
                        //if (store)  cerr<<"Store Found "<<*inst<<**uit;
                        //if (!store) cerr<<"Load  Found "<<*inst<<**uit;
                        arrayBases.push_back(arrayBase); 
@@ -348,7 +348,8 @@ namespace xVerilog {
 
                     //TODO:May overflow
                     unsigned int val = (c0->getValue().getZExtValue() + c1->getValue().getZExtValue());
-                    ConstantInt *ncon = ConstantInt::get(APInt(bitWidth, val));
+                    ConstantInt *ncon = ConstantInt::get(Type::getIntNTy(c0->getContext(), bitWidth),
+                                                         val);
                     add->replaceAllUsesWith(ncon);
                     add->eraseFromParent();
                     return;

@@ -7,7 +7,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -46,7 +46,7 @@ namespace xVerilog {
             /** 
              * @brief C'tor in LLVM style
              */
-            ModuloSchedulerDriverPass() : LoopPass((intptr_t)&ID) {}
+            ModuloSchedulerDriverPass() : LoopPass(ID) {}
 
             /** 
              * @brief Requires LoopInfo analysis and tells llvm that
