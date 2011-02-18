@@ -7,7 +7,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -37,7 +37,16 @@ namespace xVerilog {
     class globalVarRegistry {
 
         public:
-            void init(Module *M) {m_module  = M; }
+            void init(Module *M) {
+              m_module  = M; 
+              
+               /// initial values
+              Zero1 = ConstantInt::get(Type::getInt1Ty(M->getContext()), 0);
+              One1 = ConstantInt::get(Type::getInt1Ty(M->getContext()), 1);
+              Zero32 = ConstantInt::get(Type::getInt32Ty(M->getContext()), 0);
+              One32 = ConstantInt::get(Type::getInt32Ty(M->getContext()), 1);
+
+            }
 
             void destroy();
 

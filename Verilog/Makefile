@@ -7,7 +7,7 @@
 # 
 ##===----------------------------------------------------------------------===##
 
-LEVEL = ../..
+LEVEL = ../../..
 PARALLEL_DIRS = PrepareSyn Synthesis
 
 include $(LEVEL)/Makefile.common

@@ -128,7 +128,7 @@ namespace xVerilog {
             case Instruction::LShr:{ss<<evalValue(val0)<<" >> "<<evalValue(val1);break;}
             case Instruction::Shl:{ss<<evalValue(val0)<<" << "<<evalValue(val1);break;}
             default: {
-                         cerr<<"Unhandaled: "<<*inst;
+              std::cerr<<"Unhandaled: ";inst->dump();
                          abort();
                      }
         }
@@ -277,7 +277,7 @@ namespace xVerilog {
             case ICmpInst::ICMP_SLT: ss << " < "; break;
             case ICmpInst::ICMP_UGT:
             case ICmpInst::ICMP_SGT: ss << " > "; break;
-            default: cerr << "Invalid icmp predicate!"; abort();
+            default: std::cerr << "Invalid icmp predicate!"; abort();
         }
 
         ss << evalValue(cmp->getOperand(1));
@@ -343,7 +343,7 @@ namespace xVerilog {
         if (dyn_cast<AllocaInst>(inst))     return printAllocaInst(inst) + colon;
         if (dyn_cast<IntToPtrInst>(inst))   return printIntToPtrInst(inst) + colon;
         if (dyn_cast<CallInst>(inst))       return printIntrinsic(inst) + colon;
-        if (dyn_cast<Instruction>(inst)) std::cerr<<"Unable to process "<<*inst<<"\n";
+        if (dyn_cast<Instruction>(inst)) std::cerr<<"Unable to process "; inst->dump();
         assert(0 && "Unhandaled instruction");
         abort();
         return colon;
@@ -377,8 +377,8 @@ namespace xVerilog {
                 ss << " " << prefix;
                 ss << " [" <<  NumBits-1 <<":0] "<<GetValueName(I)<<";\n";
             } else {
-                cerr<<"Unable to accept non integer params: "<<*I<<"\n";
-                cerr<<"Types:"<<I->getType()->getTypeID()<<" "<<Type::ArrayTyID <<"\n";
+              std::cerr<<"Unable to accept non integer params: "; I->dump(); std::cerr<<"\n";
+                std::cerr<<"Types:"<<I->getType()->getTypeID()<<" "<<Type::ArrayTyID <<"\n";
                 abort(); }
         }
 
@@ -419,7 +419,7 @@ namespace xVerilog {
             //If we return void, we have a dummy one bit return val
             ss << " wire return_value;\n";
         } else if (F.getReturnType()->getTypeID()!=Type::IntegerTyID) {
-            cerr<<"Unable to accept non integer return func";
+            std::cerr<<"Unable to accept non integer return func";
             abort();
         } else {
             unsigned NumBits = cast<IntegerType>(F.getReturnType())->getBitWidth();
@@ -452,7 +452,7 @@ namespace xVerilog {
 
 
     string verilogLanguage::getTypeDecl(const Type *Ty, bool isSigned, const std::string &NameSoFar) {
-        assert((Ty->isPrimitiveType() || Ty->isInteger() || Ty->isSized()) && "Invalid type decl");
+        assert((Ty->isPrimitiveType() || Ty->isIntegerTy() || Ty->isSized()) && "Invalid type decl");
         std::stringstream ss;
         switch (Ty->getTypeID()) {
             case Type::VoidTyID: { 
@@ -470,7 +470,7 @@ namespace xVerilog {
                                         return ss.str();
                                     }
             default :
-                                    cerr << "Unknown primitive type: " << *Ty << "\n";
+              std::cerr << "Unknown primitive type: ";  Ty->dump();  std::cerr<< "\n";
                                     abort();
         }
     }
@@ -532,7 +532,7 @@ namespace xVerilog {
                 // for each instruction in each cycle in each LS
                 for (vector<Instruction*>::iterator I = inst.begin(); I!=inst.end(); ++I) {
                     // if has a return type, print it as a variable name
-                    if ((*I)->getType() != Type::VoidTy) {
+                  if ((*I)->getType() != Type::getVoidTy((*I)->getContext())) {
                         ss << " ";
                         ss << getTypeDecl((*I)->getType(), false, GetValueName(*I));
                         ss << ";   /*local var*/\n";
@@ -545,7 +545,7 @@ namespace xVerilog {
             for (BasicBlock::iterator bit = bb->begin(); bit != bb->end(); bit++) { 
                 if (dyn_cast<PHINode>(bit)) {
                     // if has a return type, print it as a variable name 
-                    if ((bit)->getType() != Type::VoidTy) { 
+                  if ((bit)->getType() != Type::getVoidTy(bit->getContext())) { 
                         ss << " "; 
                         ss << getTypeDecl((bit)->getType(), false, GetValueName(bit)); 
                         ss << ";   /*phi var*/\n"; 
@@ -661,7 +661,7 @@ namespace xVerilog {
             } else if (calc->getOpcode() == Instruction::Or) {
                 ss<<evalValue(v0)<<" | "<<evalValue(v1);
             } else {
-                cerr<<"Unknown Instruction "<<*calc;
+              std::cerr<<"Unknown Instruction "; calc->dump();
                 abort();
             }
         } else if (dyn_cast<TruncInst>(inst)) { 
@@ -686,7 +686,7 @@ namespace xVerilog {
             // make the cast
             ss <<  evalValue(inst->getOperand(0));
         } else {
-            std::cerr<<"Unknown wire instruction "<<*inst;
+          std::cerr<<"Unknown wire instruction "; inst->dump();
             abort();
         }
 
@@ -737,7 +737,7 @@ namespace xVerilog {
             ss << " output return_value;\n";
             ss << " reg return_value;\n";
         } else if (F->getReturnType()->getTypeID()!=Type::IntegerTyID) {
-            cerr<<"Unable to accept non integer return func";
+            std::cerr<<"Unable to accept non integer return func";
             abort();
         } else {
             unsigned NumBits = cast<IntegerType>(F->getReturnType())->getBitWidth();

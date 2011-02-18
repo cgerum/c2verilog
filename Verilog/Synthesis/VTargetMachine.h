@@ -1,4 +1,4 @@
-/* Nadav Rotem  - C-to-Verilog.com */
+/* -*- C++ -*- Nadav Rotem  - C-to-Verilog.com */
 #ifndef VTARGETMACHINE_H
 #define VTARGETMACHINE_H
 
@@ -10,8 +10,8 @@ namespace llvm {
 struct VTargetMachine : public TargetMachine {
   const TargetData DataLayout;       // Calculates type size & alignment
 
-  VTargetMachine(const Module &M, const std::string &FS)
-    : DataLayout(&M) {}
+  VTargetMachine(const Target &T, const std::string &TT, const std::string &FS)
+    : TargetMachine(T), DataLayout() {} //TODO: Choose correct target data layout
 
   virtual bool WantsWholeFile() const { return true; }
   virtual bool addPassesToEmitWholeFile(PassManager &PM, raw_ostream &Out,
@@ -22,6 +22,8 @@ struct VTargetMachine : public TargetMachine {
   
   virtual const TargetData *getTargetData() const { return &DataLayout; }
 };
+
+extern Target TheVBackendTarget;
 
 } // End llvm namespace
 

@@ -7,9 +7,9 @@
 # 
 ##===----------------------------------------------------------------------===##
 
-LEVEL = ../../..
+LEVEL = ../../../..
 LIBRARYNAME = LLVMPrepareSynthesis
-LOADABLE_MODULE = 1
+#LOADABLE_MODULE = 1
 #BUILD_ARCHIVE = 1
 BUILT_SOURCES = ../params.cpp
 

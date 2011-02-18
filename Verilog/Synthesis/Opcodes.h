@@ -7,7 +7,7 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
@@ -59,7 +59,7 @@ namespace xVerilog {
                 );
 
         /// @brief Clone an identical DelayInst
-        virtual CastInst *clone() const;
+        virtual CastInst *clone_impl() const;
 
         /// @brief Methods for support type inquiry through isa, cast, and dyn_cast:
         static inline bool classof(const DelayInst *) { return true; }

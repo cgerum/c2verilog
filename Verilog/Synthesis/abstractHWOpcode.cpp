@@ -47,10 +47,10 @@ namespace xVerilog{
         if (bitWidth0 == bitWidth1) {
             inst->replaceAllUsesWith(ld);
         } else if(bitWidth0 > bitWidth1) {
-                        CastInst* t = new TruncInst(ld, IntegerType::get(bitWidth1),"trAssign");
+          CastInst* t = new TruncInst(ld, IntegerType::get(inst->getContext(), bitWidth1),"trAssign");
                         inst->replaceAllUsesWith(t);
         } else if(bitWidth0 < bitWidth1) { 
-                        CastInst* c = new SExtInst(ld, IntegerType::get(bitWidth1),"exAssign");
+                        CastInst* c = new SExtInst(ld, IntegerType::get(inst->getContext(), bitWidth1),"exAssign");
                         inst->replaceAllUsesWith(c);
         }
         
@@ -150,8 +150,8 @@ static string getVarName(Value* Op){
                         gvr.getGlobalVariableByName("mem_"+arrName+"_mode",1,false)); 
                 // store address first
                 const Type* addr_type = inst->getOperand(0)->getType(); //JAWAD
-		std::cout <<"ADDR_TYPE1 = : " << *addr_type << "   arrName:  " << arrName <<"\n";
-		std::cout <<"ADDR_TYPE2 = : " << *addr_type << "   arrName:  " << arrName <<"\n";
+		std::cout <<"ADDR_TYPE1 = : " /*<< *addr_type*/ << "   arrName:  " << arrName <<"\n"; //TODO: fix dump
+		std::cout <<"ADDR_TYPE2 = : " /*<< *addr_type*/ << "   arrName:  " << arrName <<"\n";
                 Value* port = gvr.getGlobalVariableByName("mem_"+arrName+"_addr",addr_type);
                 StoreInst* l2 = new StoreInst(inst->getOperand(0) ,port);
                 // read answer after
@@ -458,9 +458,9 @@ static string getVarName(Value* Op){
             // Inline expressions in return values. We can't handle PHINodes, so 
             // don't inline them. 
             // Do 
-            if ( (dyn_cast<ReturnInst>(inst->use_begin()) && 
-                  dyn_cast<LoadInst>(inst->use_begin()) && 
-                  dyn_cast<StoreInst>(inst->use_begin())) 
+          if ( (dyn_cast<ReturnInst>(*(inst->use_begin())) && 
+                dyn_cast<LoadInst>(*(inst->use_begin())) && 
+                dyn_cast<StoreInst>(*(inst->use_begin()))) 
                     //Don't
                     && !dyn_cast<PHINode>(inst) 
                     && !dyn_cast<LoadInst>(inst)) {

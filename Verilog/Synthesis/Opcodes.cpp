@@ -27,6 +27,6 @@ namespace xVerilog{
         return 0;
     }
 
-     CastInst   *DelayInst::clone()     const { return new DelayInst(*this); }
+CastInst   *DelayInst::clone_impl()     const { return new DelayInst(*this); }
 
 } // namespace

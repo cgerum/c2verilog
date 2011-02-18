@@ -17,14 +17,14 @@
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/CodeGen/IntrinsicLowering.h"
 #include "llvm/Transforms/Scalar.h"
-#include "llvm/Target/TargetMachineRegistry.h"
+#include "llvm/Target/TargetRegistry.h"
 #include "llvm/Target/TargetAsmInfo.h"
 #include "llvm/Target/TargetData.h"
 #include "llvm/Support/CallSite.h"
 #include "llvm/Support/CFG.h"
 #include "llvm/Support/GetElementPtrTypeIterator.h"
 #include "llvm/Support/InstVisitor.h"
-#include "llvm/Support/Mangler.h"
+#include "llvm/Target/Mangler.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/STLExtras.h"
@@ -46,9 +46,16 @@ using namespace llvm;
 using std::string;
 using std::stringstream;
 using llvm::TargetData; //JAWAD
+
+extern "C" void LLVMInitializeVBackendTarget() {
+   // Register the target.
+   RegisterTargetMachine<VTargetMachine> X(TheVBackendTarget);
+}
+
+
 namespace xVerilog {
     // Register the target.
-    static RegisterTarget<VTargetMachine> MXVVE("v", "Verilog backend");
+    //static RegisterTarget<VTargetMachine> MXVVE("v", "Verilog backend");
   
     /// VWriter - This class is the main chunk of code that converts an LLVM
     /// module to a Verilog translation unit.
@@ -57,7 +64,7 @@ namespace xVerilog {
         public:
             static char ID;
             VWriter(llvm::raw_ostream &o) 
-                : FunctionPass((intptr_t)&ID),Out(o) {}
+                : FunctionPass(ID),Out(o) {}
 
             virtual const char *getPassName() const { return "verilog backend"; }
 
@@ -136,11 +143,11 @@ namespace xVerilog {
         if (0==include_clocks) clocks = 1;
         if (0==include_size) gsize = 1;
 
-        cerr<<"\n\n---  Synthesis Report ----\n";
-        cerr<<"Estimated circuit delay   : " << freq<<"ns ("<<1000/freq<<"Mhz)\n";
-        cerr<<"Estimated circuit size    : " << gsize<<"\n";
-        cerr<<"Calculated loop throughput: " << clocks<<"\n";
-        cerr<<"--------------------------\n";
+        std::cerr<<"\n\n---  Synthesis Report ----\n";
+        std::cerr<<"Estimated circuit delay   : " << freq<<"ns ("<<1000/freq<<"Mhz)\n";
+        std::cerr<<"Estimated circuit size    : " << gsize<<"\n";
+        std::cerr<<"Calculated loop throughput: " << clocks<<"\n";
+        std::cerr<<"--------------------------\n";
 
         Out<<"/* Total Score= |"<< ((clocks*sqrt(clocks))*(freq)*(gsize))/(MDF) <<"| */"; 
         Out<<"/* freq="<<freq<<" clocks="<<clocks<<" size="<<gsize<<"*/\n"; 
@@ -189,8 +196,8 @@ namespace xVerilog {
     }
 
     bool VWriter::doInitialization(Module &M) { 
-        Mang = new Mangler(M);
-        Mang->markCharUnacceptable('.');
+      //Mang = new Mangler(); //TODO
+        //Mang->markCharUnacceptable('.');
         globalVarRegistry gvr;
         gvr.init(&M);
         return true;
@@ -204,7 +211,7 @@ namespace xVerilog {
 
 bool VTargetMachine::addPassesToEmitWholeFile(PassManager &PM, llvm::raw_ostream &o, 
         CodeGenFileType FileType, bool Fast) {
-    if (FileType != TargetMachine::AssemblyFile) return true;
+  //if (FileType != TargetMachine::AssemblyFile) return true;
 
     PM.add(new xVerilog::VWriter(o));
     return false;

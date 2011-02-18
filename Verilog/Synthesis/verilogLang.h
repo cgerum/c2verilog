@@ -7,14 +7,14 @@
 #include "llvm/Instructions.h"
 #include "llvm/Constants.h"
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Streams.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Module.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/CFG.h"
 #include "llvm/DerivedTypes.h"
 
-#include "llvm/Support/Mangler.h"
+#include "llvm/Target/Mangler.h"
 
 #include <iostream>
 #include <string>

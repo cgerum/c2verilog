@@ -138,7 +138,7 @@ namespace xVerilog {
 
         const Type* Ty = inst->getType();
         // if we don't know this type, don't normalize it
-        if (!Ty->isPrimitiveType() || !Ty->isInteger() || !Ty->isSized()) return delay;
+        if (!Ty->isPrimitiveType() || !Ty->isIntegerTy() || !Ty->isSized()) return delay;
         if (Ty->getTypeID() ==  Type::IntegerTyID) {
             unsigned NBits = cast<IntegerType>(Ty)->getBitWidth();
             delay = (delay/32)*NBits;
@@ -168,7 +168,7 @@ namespace xVerilog {
 
     int designScorer::getInstructionSize(Instruction* inst) {
         const Type* Ty = inst->getType();
-        if (!Ty->isPrimitiveType() || !Ty->isInteger() || !Ty->isSized()) return 1;
+        if (!Ty->isPrimitiveType() || !Ty->isIntegerTy() || !Ty->isSized()) return 1;
         unsigned int gates = 0;
 
         switch (Ty->getTypeID()) {

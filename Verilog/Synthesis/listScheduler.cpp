@@ -234,7 +234,7 @@ namespace xVerilog {
         for(vector<resourceUnit*>::iterator it = m_units.begin(); it!=m_units.end(); ++it) {
             if ((*it)->hasInstruction(inst)) return (*it)->getId();
         }
-        cerr<<"unable to find the resource unit for instruction "<<inst<<"\n";
+        std::cerr<<"unable to find the resource unit for instruction "<<inst<<"\n";
         abort();
         return 0;
     }
@@ -306,12 +306,12 @@ namespace xVerilog {
 
         //print list Scheduler
         // debug
-        cerr<<"---=="<<this->getBB()->getName()<<"["<<this->length()<<"]==---\n";
+        std::cerr<<"---=="<<this->getBB()->getName().str()<<"["<<this->length()<<"]==---\n";
         for (vector<resourceUnit*>::iterator un = m_units.begin(); un!=m_units.end();++un) {
-            cerr<<(*un)->toString();
+          std::cerr<<(*un)->toString();
         }
 
-        cerr<<"resource usage: "
+        std::cerr<<"resource usage: "
             <<"memport:"<<getMaxResourceUsage("mem")<<" "
             <<"mul:"<<getMaxResourceUsage("mul")<<" "
             <<"div:"<<getMaxResourceUsage("div")<<" "

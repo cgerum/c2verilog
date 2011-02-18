@@ -8,12 +8,7 @@ namespace xVerilog {
     map<string, GlobalVariable*> globalVarRegistry::m_map;
     vector<Instruction*> globalVarRegistry::m_garbage;
 
-    /// initial values
-    Value* globalVarRegistry::Zero1 = ConstantInt::get(Type::Int1Ty, 0);
-    Value* globalVarRegistry::One1 = ConstantInt::get(Type::Int1Ty, 1);
-    Value* globalVarRegistry::Zero32 = ConstantInt::get(Type::Int32Ty, 0);
-    Value* globalVarRegistry::One32 = ConstantInt::get(Type::Int32Ty, 1);
-
+   
     void globalVarRegistry::destroy() {
         // destroy all variables that should be destroied
         // We do that so that we don't have dead values with users
@@ -40,12 +35,12 @@ namespace xVerilog {
     }
 
     const Type* globalVarRegistry::bitNumToType(int bitnum){
-        if (bitnum==64) return Type::Int64Ty;
-        if (bitnum==32) return Type::Int32Ty;
-        if (bitnum==16) return Type::Int16Ty;
-        if (bitnum==8) return Type::Int8Ty;
-        if (bitnum==1) return Type::Int1Ty;
-        cerr<<"Unsupported bit addressing mode; "<<bitnum<<"\n";
+        if (bitnum==64) return Type::getInt64Ty(m_module->getContext());
+        if (bitnum==32) return Type::getInt32Ty(m_module->getContext());
+        if (bitnum==16) return Type::getInt16Ty(m_module->getContext());
+        if (bitnum==8) return Type::getInt8Ty(m_module->getContext());
+        if (bitnum==1) return Type::getInt1Ty(m_module->getContext());
+        std::cerr<<"Unsupported bit addressing mode; "<<bitnum<<"\n";
         abort();
     }
 
