@@ -6,3 +6,5 @@
 *.a
 
 llvm
+Debug+Asserts
+CMakeLists.txt
