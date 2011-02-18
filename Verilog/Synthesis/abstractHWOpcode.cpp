@@ -146,7 +146,7 @@ static string getVarName(Value* Op){
                 m_opcodeName = "mem_" + arrName;
 
                 // store the mode
-                StoreInst* l1 = new StoreInst(gvr.Zero1, 
+                StoreInst* l1 = new StoreInst(ConstantInt::get(Type::getInt1Ty(inst->getContext()), 0), //TODO: use value from gvr 
                         gvr.getGlobalVariableByName("mem_"+arrName+"_mode",1,false)); 
                 // store address first
                 const Type* addr_type = inst->getOperand(0)->getType(); //JAWAD
@@ -196,7 +196,7 @@ static string getVarName(Value* Op){
                 	s1 = new StoreInst(inst->getOperand(0),v1); 
 		}
                 // store the data write mode 
-                StoreInst* s2 = new StoreInst(gvr.One1, 
+                StoreInst* s2 = new StoreInst(ConstantInt::get(Type::getInt1Ty(inst->getContext()), 1), 
                         gvr.getGlobalVariableByName("mem_"+arrName+"_mode",1));
                 // store address
 		GlobalVariable*  v2;
@@ -214,7 +214,7 @@ static string getVarName(Value* Op){
                 	s3 = new StoreInst(inst->getOperand(1),v2); 
 		}
                 // store the data write mode 
-                StoreInst* s4 = new StoreInst(gvr.Zero1, 
+                StoreInst* s4 = new StoreInst(ConstantInt::get(Type::getInt1Ty(inst->getContext()), 0), 
                         gvr.getGlobalVariableByName("mem_"+arrName+"_mode",1));
 
                 InstructionCycle cycle0;

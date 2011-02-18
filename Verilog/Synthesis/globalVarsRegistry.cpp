@@ -8,6 +8,12 @@ namespace xVerilog {
     map<string, GlobalVariable*> globalVarRegistry::m_map;
     vector<Instruction*> globalVarRegistry::m_garbage;
 
+    /// initial values
+    Value* Zero1 = 0;
+    Value* One1 = 0; 
+    Value* Zero32 = 0; 
+    Value* One32 = 0; 
+
    
     void globalVarRegistry::destroy() {
         // destroy all variables that should be destroied

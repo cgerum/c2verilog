@@ -38,13 +38,13 @@ namespace xVerilog {
 
         public:
             void init(Module *M) {
-              m_module  = M; 
+              m_module  = M;
               
-               /// initial values
-              Zero1 = ConstantInt::get(Type::getInt1Ty(M->getContext()), 0);
-              One1 = ConstantInt::get(Type::getInt1Ty(M->getContext()), 1);
-              Zero32 = ConstantInt::get(Type::getInt32Ty(M->getContext()), 0);
-              One32 = ConstantInt::get(Type::getInt32Ty(M->getContext()), 1);
+              /// initial values
+              //Zero1 = ConstantInt::get(Type::getInt1Ty(M->getContext()), 0);
+              //One1 = ConstantInt::get(Type::getInt1Ty(M->getContext()), 1);
+              //Zero32 = ConstantInt::get(Type::getInt32Ty(M->getContext()), 0);
+              //One32 = ConstantInt::get(Type::getInt32Ty(M->getContext()), 1);
 
             }
 

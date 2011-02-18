@@ -8,10 +8,12 @@
 ##===----------------------------------------------------------------------===##
 
 LEVEL = ../../../..
-LIBRARYNAME = LLVMSynthesis
+LIBRARYNAME = LLVMVerilog
 TARGET=Verilog
 #LOADABLE_MODULE = 1
 BUILT_SOURCES=../params.cpp
+DIRS = TargetInfo
+
 include $(LEVEL)/Makefile.common
 
 

@@ -47,7 +47,7 @@ using std::string;
 using std::stringstream;
 using llvm::TargetData; //JAWAD
 
-extern "C" void LLVMInitializeVBackendTarget() {
+extern "C" void LLVMInitializeVerilogTarget() {
    // Register the target.
    RegisterTargetMachine<VTargetMachine> X(TheVBackendTarget);
 }
