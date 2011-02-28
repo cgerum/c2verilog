@@ -33,9 +33,15 @@
 #include <algorithm>
 #include <sstream>
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/FormattedStream.h"
 
-#include <llvm/ADT/DenseMap.h>
+
+
+#include "llvm/ADT/DenseMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/MC/MCAsmInfo.h"
+#include "llvm/MC/MCContext.h"
+#include "llvm/Support/Debug.h"
 
 #include "listScheduler.h"
 #include "verilogLang.h"
@@ -54,8 +60,16 @@ extern "C" void LLVMInitializeVerilogTarget() {
 
 
 namespace xVerilog {
-    // Register the target.
-    //static RegisterTarget<VTargetMachine> MXVVE("v", "Verilog backend");
+
+//ASMInfo
+class VBEMCAsmInfo : public MCAsmInfo {
+  public:
+  VBEMCAsmInfo() {
+    GlobalPrefix = "";
+    PrivateGlobalPrefix = "";
+  }
+};
+
   
     /// VWriter - This class is the main chunk of code that converts an LLVM
     /// module to a Verilog translation unit.
@@ -63,16 +77,18 @@ namespace xVerilog {
 
         public:
             static char ID;
-            VWriter(llvm::raw_ostream &o) 
-                : FunctionPass(ID),Out(o) {}
+            VWriter(llvm::formatted_raw_ostream &o) 
+                : FunctionPass(ID),Out(o) {
+              initializeLoopInfoPass(*PassRegistry::getPassRegistry());
+            }
 
             virtual const char *getPassName() const { return "verilog backend"; }
 
             void getAnalysisUsage(AnalysisUsage &AU) const {
-                AU.addRequired<LoopInfo>();
-                AU.addPreserved<LoopInfo>();
-	        AU.addRequired<TargetData>();//JAWAD 
-                AU.setPreservesAll();
+              AU.addRequired<LoopInfo>();
+              //AU.addPreserved<LoopInfo>();
+	        //AU.addRequired<TargetData>();//JAWAD 
+                //AU.setPreservesAll();
             }
 
             virtual bool doInitialization(Module &M);
@@ -81,8 +97,11 @@ namespace xVerilog {
             bool runOnFunction(Function &F);
 
         private:
-            llvm::raw_ostream &Out;
+            llvm::formatted_raw_ostream &Out;
             Mangler *Mang;
+      MCAsmInfo *tAI;
+      MCContext *tCtx;
+      TargetData *TD;
     };
 
 
@@ -101,8 +120,9 @@ namespace xVerilog {
 
         //std::cerr<<"Converting to verilog this function:\n" <<F<<"\n\n";
 
- 	TargetData * TD =  &getAnalysis<TargetData>();//JAWAD
-        verilogLanguage verilogPrinter(F.getParent(),Mang,TD);
+ 	//TargetData * TD =  &getAnalysis<TargetData>();//JAWAD
+        TargetData TD(F.getParent());
+        verilogLanguage verilogPrinter(F.getParent(),Mang,&TD);
 
         listSchedulerVector lv;
 
@@ -122,7 +142,7 @@ namespace xVerilog {
         designScorer ds(LInfo);
 
         for (Function::iterator BB = F.begin(), E = F.end(); BB != E; ++BB) {
-            listScheduler *ls = new listScheduler(BB,TD); //JAWAD
+            listScheduler *ls = new listScheduler(BB,&TD); //JAWAD
             lv.push_back(ls);
             ds.addListScheduler(ls);
         }
@@ -185,19 +205,26 @@ namespace xVerilog {
         Out<<verilogPrinter.getBRAMDefinition(resourceMap["mem_wordsize"],resourceMap["membus_size"]);
         Out<<verilogPrinter.getTestBench(F);
         //std::cerr<<"done scheduling function\n";
+        
         return true;
     }
 
     bool VWriter::doFinalization(Module &M) {
-        globalVarRegistry gvr;
-        gvr.destroy();
+      //globalVarRegistry gvr;
+      //gvr.destroy();
         delete Mang;
+        //delete tCtx;
+        delete tAI;
+        delete TD;
         return true;
     }
 
-    bool VWriter::doInitialization(Module &M) { 
-      //Mang = new Mangler(); //TODO
-        //Mang->markCharUnacceptable('.');
+    bool VWriter::doInitialization(Module &M) {
+      TD = new TargetData(&M);
+      tAI = new VBEMCAsmInfo();
+      tCtx = new MCContext(*tAI, NULL);
+      Mang = new Mangler(*tCtx, *TD); 
+      //Mang->markCharUnacceptable('.'); //TODO
         globalVarRegistry gvr;
         gvr.init(&M);
         return true;
@@ -209,10 +236,19 @@ namespace xVerilog {
 //                       External Interface declaration
 //===----------------------------------------------------------------------===//
 
-bool VTargetMachine::addPassesToEmitWholeFile(PassManager &PM, llvm::raw_ostream &o, 
-        CodeGenFileType FileType, bool Fast) {
-  //if (FileType != TargetMachine::AssemblyFile) return true;
+bool VTargetMachine::addPassesToEmitFile(PassManagerBase &PM, 
+                                              llvm::formatted_raw_ostream &o, 
+                                              CodeGenFileType FileType, 
+                                               CodeGenOpt::Level OptLevel,
+                                              bool Fast) {
+    if (FileType != TargetMachine::CGFT_AssemblyFile) return true;
 
+    dbgs() << "Adding passes to emit whole file\n";
+    
+    //PM.add(createGCLoweringPass());
+    PM.add(createLowerInvokePass());
+    PM.add(createCFGSimplificationPass());
     PM.add(new xVerilog::VWriter(o));
+    //PM.add(createGCInfoDeleter());
     return false;
 }

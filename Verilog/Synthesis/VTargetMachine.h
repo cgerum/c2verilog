@@ -8,19 +8,20 @@
 namespace llvm {
 
 struct VTargetMachine : public TargetMachine {
-  const TargetData DataLayout;       // Calculates type size & alignment
-
   VTargetMachine(const Target &T, const std::string &TT, const std::string &FS)
-    : TargetMachine(T), DataLayout() {} //TODO: Choose correct target data layout
+    : TargetMachine(T) {} 
 
   virtual bool WantsWholeFile() const { return true; }
-  virtual bool addPassesToEmitWholeFile(PassManager &PM, raw_ostream &Out,
-                                        CodeGenFileType FileType, bool Fast);
+  virtual bool addPassesToEmitFile(PassManagerBase &PM,
+                                   formatted_raw_ostream &Out,
+                                   CodeGenFileType FileType,
+                                   CodeGenOpt::Level OptLevel,
+                                   bool DisableVerify);
 
   // This class always works, but shouldn't be the default in most cases.
   static unsigned getModuleMatchQuality(const Module &M) { return 1; }
   
-  virtual const TargetData *getTargetData() const { return &DataLayout; }
+  virtual const TargetData *getTargetData() const { return 0; }
 };
 
 extern Target TheVBackendTarget;

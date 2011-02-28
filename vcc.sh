@@ -17,13 +17,18 @@ MYFLAGS= #"-parallel_balance -reduce_bitwidth " #-detect_arrays"
 rm -f $TMPFILE
 rm -f /tmp/dis.txt /tmp/dis1.txt /tmp/dis2.txt /tmp/dis3.txt /tmp/dis4.txt
 
+echo $LLVM/bin/clang -emit-llvm -c $1 -o $TMPFILE
 $LLVM/bin/clang -emit-llvm -c $1 -o $TMPFILE
 $LLVM/bin/llvm-dis $TMPFILE -o /tmp/dis1.txt
+echo $LLVM/bin/opt  $OPTFLAGS  $TMPFILE -o $TMPFILE -f
 $LLVM/bin/opt  $OPTFLAGS  $TMPFILE -o $TMPFILE -f
 $LLVM/bin/llvm-dis $TMPFILE -o /tmp/dis2.txt
+echo $LLVM/bin/opt  -dce  -adce $TMPFILE -o $TMPFILE -f
 $LLVM/bin/opt  -dce  -adce $TMPFILE -o $TMPFILE -f
 $LLVM/bin/llvm-dis $TMPFILE -o /tmp/dis3.txt
+echo $LLVM/bin/opt  -dse -std-compile-opts $MYFLAGS $TMPFILE -o $TMPFILE -f
 $LLVM/bin/opt  -dse -std-compile-opts $MYFLAGS $TMPFILE -o $TMPFILE -f
 $LLVM/bin/llvm-dis $TMPFILE -o /tmp/dis4.txt
+echo $LLVM/bin/llc  -march=v $SYNFLAGS $TMPFILE  -o=$2
 $LLVM/bin/llc  -march=v $SYNFLAGS $TMPFILE  -o=$2
 
